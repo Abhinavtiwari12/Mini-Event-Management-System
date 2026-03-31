@@ -1,0 +1,236 @@
+openapi: 3.0.0
+info:
+  title: Mini Event Management API (Auth Enabled)
+  version: 2.0.0
+  description: API for managing users, events, bookings, and attendance. Protected by JWT.
+servers:
+  - url: http://localhost:3000/api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /users/register:
+    post:
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Invalid input or User already exists
+
+  /users/login:
+    post:
+      summary: Login as a user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+
+  /users/profile:
+    get:
+      summary: Get logged-in user profile
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+
+  /users/logout:
+    post:
+      summary: Logout user
+      responses:
+        '200':
+          description: OK
+
+  /admin/register:
+    post:
+      summary: Register a new admin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Admin registered successfully
+
+  /admin/login:
+    post:
+      summary: Login as an admin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+
+  /admin/logout:
+    post:
+      summary: Logout admin
+      responses:
+        '200':
+          description: OK
+
+  /admin/events:
+    post:
+      summary: Create a new event (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, date, total_capacity]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                total_capacity:
+                  type: integer
+      responses:
+        '201':
+          description: Event created successfully
+        '403':
+          description: Require Admin Role
+
+  /admin/events/{id}:
+    put:
+      summary: Update an existing event (Admin only)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                total_capacity:
+                  type: integer
+      responses:
+        '200':
+          description: Event updated successfully
+        '403':
+          description: Require Admin Role
+        '404':
+          description: Event not found
+
+  /events:
+    get:
+      summary: List all events
+      security: []
+      responses:
+        '200':
+          description: A list of events
+
+  /bookings:
+    post:
+      summary: Book a ticket for an event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event_id]
+              properties:
+                event_id:
+                  type: integer
+      responses:
+        '201':
+          description: Ticket booked successfully
+        '400':
+          description: Event fully booked
+        '404':
+          description: Event not found
+
+  /attendance:
+    post:
+      summary: Record user entry time for an event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event_id]
+              properties:
+                event_id:
+                  type: integer
+      responses:
+        '201':
+          description: Attendance recorded successfully
+        '400':
+          description: No booking found for user in this event
